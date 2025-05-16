@@ -1,4 +1,6 @@
-import React from "react";
+'use client';
+import { useEffect } from "react"; 
+ import React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,6 +23,7 @@ import { features } from "@/data/features";
 import { testimonial } from "@/data/testimonial";
 import { faqs } from "@/data/faqs";
 import { howItWorks } from "@/data/howItWorks";
+import FloatingChat from "@/components/FloatingChat";
 
 export default function LandingPage() {
   return (
@@ -207,6 +210,8 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+       
+      <FloatingChat />
     </>
   );
 }
