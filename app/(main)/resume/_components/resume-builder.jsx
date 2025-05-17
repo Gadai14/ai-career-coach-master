@@ -10,6 +10,8 @@ import {
   Loader2,
   Monitor,
   Save,
+  FileText,
+  Layout
 } from "lucide-react";
 import { toast } from "sonner";
 import MDEditor from "@uiw/react-md-editor";
@@ -24,23 +26,27 @@ import { useUser } from "@clerk/nextjs";
 import { entriesToMarkdown } from "@/app/lib/helper";
 import { resumeSchema } from "@/app/lib/schema";
 import html2pdf from "html2pdf.js/dist/html2pdf.min.js";
+import ProfessionalResumeTemplate from "./ProfessionalResumeTemplate";
 
 export default function ResumeBuilder({ initialContent }) {
   const [activeTab, setActiveTab] = useState("edit");
   const [previewContent, setPreviewContent] = useState(initialContent);
   const { user } = useUser();
   const [resumeMode, setResumeMode] = useState("preview");
+  const [templateMode, setTemplateMode] = useState("professional"); // 'markdown' or 'professional'
 
   const {
     control,
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(resumeSchema),
     defaultValues: {
       contactInfo: {},
+      title: "",
       summary: "",
       skills: "",
       experience: [],
@@ -60,7 +66,10 @@ export default function ResumeBuilder({ initialContent }) {
   const formValues = watch();
 
   useEffect(() => {
-    if (initialContent) setActiveTab("preview");
+    if (initialContent) {
+      setActiveTab("preview");
+      // Could parse initial content back into form values if needed
+    }
   }, [initialContent]);
 
   // Update preview content when form values change
@@ -91,7 +100,7 @@ export default function ResumeBuilder({ initialContent }) {
     if (contactInfo.twitter) parts.push(`🐦 [Twitter](${contactInfo.twitter})`);
 
     return parts.length > 0
-      ? `## <div align="center">${user.fullName}</div>
+      ? `## <div align="center">${user?.fullName || "Your Name"}</div>
         \n\n<div align="center">\n\n${parts.join(" | ")}\n\n</div>`
       : "";
   };
@@ -116,17 +125,39 @@ export default function ResumeBuilder({ initialContent }) {
     setIsGenerating(true);
     try {
       const element = document.getElementById("resume-pdf");
+      
+      // Clean up any existing PDF elements for a fresh copy
+      document.querySelectorAll('.html2pdf__container').forEach(el => el.remove());
+      
+      // Configure PDF options for professional output
       const opt = {
-        margin: [15, 15],
-        filename: "resume.pdf",
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+        margin: [0, 0],
+        filename: "professional_resume.pdf",
+        image: { type: "jpeg", quality: 1.0 },
+        html2canvas: { 
+          scale: 2, 
+          useCORS: true,
+          logging: false,
+          letterRendering: true,
+          allowTaint: false
+        },
+        jsPDF: { 
+          unit: "mm", 
+          format: "a4", 
+          orientation: "portrait",
+          compress: true
+        },
+        pagebreak: { mode: 'avoid-all' }
       };
 
+      // Add a small delay to ensure element styles are fully applied
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       await html2pdf().set(opt).from(element).save();
+      toast.success("Professional PDF downloaded successfully!");
     } catch (error) {
       console.error("PDF generation error:", error);
+      toast.error("Failed to generate PDF. Please try again.");
     } finally {
       setIsGenerating(false);
     }
@@ -139,11 +170,24 @@ export default function ResumeBuilder({ initialContent }) {
         .replace(/\n\s*\n/g, "\n\n") // Normalize multiple newlines to double newlines
         .trim();
 
-      console.log(previewContent, formattedContent);
-      await saveResumeFn(previewContent);
+      await saveResumeFn(formattedContent);
     } catch (error) {
       console.error("Save error:", error);
     }
+  };
+
+  // Create resume data object from form values
+  const getResumeData = () => {
+    return {
+      fullName: user?.fullName || "Your Name",
+      title: formValues.title || "Professional Title",
+      contactInfo: formValues.contactInfo || {},
+      summary: formValues.summary || "",
+      skills: formValues.skills || "",
+      experience: formValues.experience || [],
+      education: formValues.education || [],
+      projects: formValues.projects || [],
+    };
   };
 
   return (
@@ -165,7 +209,7 @@ export default function ResumeBuilder({ initialContent }) {
               </>
             ) : (
               <>
-                <Save className="h-4 w-4" />
+                <Save className="h-4 w-4 mr-2" />
                 Save
               </>
             )}
@@ -173,12 +217,12 @@ export default function ResumeBuilder({ initialContent }) {
           <Button onClick={generatePDF} disabled={isGenerating}>
             {isGenerating ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 Generating PDF...
               </>
             ) : (
               <>
-                <Download className="h-4 w-4" />
+                <Download className="h-4 w-4 mr-2" />
                 Download PDF
               </>
             )}
@@ -189,11 +233,26 @@ export default function ResumeBuilder({ initialContent }) {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="edit">Form</TabsTrigger>
-          <TabsTrigger value="preview">Markdown</TabsTrigger>
+          <TabsTrigger value="preview">Preview</TabsTrigger>
         </TabsList>
 
         <TabsContent value="edit">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+            {/* Professional Title */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium">Professional Title</h3>
+              <Controller
+                name="title"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    {...field}
+                    placeholder="e.g. Registered Nurse, Software Engineer, Project Manager"
+                  />
+                )}
+              />
+            </div>
+
             {/* Contact Information */}
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Contact Information</h3>
@@ -204,7 +263,6 @@ export default function ResumeBuilder({ initialContent }) {
                     {...register("contactInfo.email")}
                     type="email"
                     placeholder="your@email.com"
-                    error={errors.contactInfo?.email}
                   />
                   {errors.contactInfo?.email && (
                     <p className="text-sm text-red-500">
@@ -219,11 +277,13 @@ export default function ResumeBuilder({ initialContent }) {
                     type="tel"
                     placeholder="+1 234 567 8900"
                   />
-                  {errors.contactInfo?.mobile && (
-                    <p className="text-sm text-red-500">
-                      {errors.contactInfo.mobile.message}
-                    </p>
-                  )}
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Address</label>
+                  <Input
+                    {...register("contactInfo.address")}
+                    placeholder="City, State, ZIP"
+                  />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">LinkedIn URL</label>
@@ -232,11 +292,6 @@ export default function ResumeBuilder({ initialContent }) {
                     type="url"
                     placeholder="https://linkedin.com/in/your-profile"
                   />
-                  {errors.contactInfo?.linkedin && (
-                    <p className="text-sm text-red-500">
-                      {errors.contactInfo.linkedin.message}
-                    </p>
-                  )}
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">
@@ -247,11 +302,6 @@ export default function ResumeBuilder({ initialContent }) {
                     type="url"
                     placeholder="https://twitter.com/your-handle"
                   />
-                  {errors.contactInfo?.twitter && (
-                    <p className="text-sm text-red-500">
-                      {errors.contactInfo.twitter.message}
-                    </p>
-                  )}
                 </div>
               </div>
             </div>
@@ -267,13 +317,9 @@ export default function ResumeBuilder({ initialContent }) {
                     {...field}
                     className="h-32"
                     placeholder="Write a compelling professional summary..."
-                    error={errors.summary}
                   />
                 )}
               />
-              {errors.summary && (
-                <p className="text-sm text-red-500">{errors.summary.message}</p>
-              )}
             </div>
 
             {/* Skills */}
@@ -286,14 +332,10 @@ export default function ResumeBuilder({ initialContent }) {
                   <Textarea
                     {...field}
                     className="h-32"
-                    placeholder="List your key skills..."
-                    error={errors.skills}
+                    placeholder="List your key skills (comma separated for best display in professional template)..."
                   />
                 )}
               />
-              {errors.skills && (
-                <p className="text-sm text-red-500">{errors.skills.message}</p>
-              )}
             </div>
 
             {/* Experience */}
@@ -310,11 +352,6 @@ export default function ResumeBuilder({ initialContent }) {
                   />
                 )}
               />
-              {errors.experience && (
-                <p className="text-sm text-red-500">
-                  {errors.experience.message}
-                </p>
-              )}
             </div>
 
             {/* Education */}
@@ -331,11 +368,6 @@ export default function ResumeBuilder({ initialContent }) {
                   />
                 )}
               />
-              {errors.education && (
-                <p className="text-sm text-red-500">
-                  {errors.education.message}
-                </p>
-              )}
             </div>
 
             {/* Projects */}
@@ -352,66 +384,93 @@ export default function ResumeBuilder({ initialContent }) {
                   />
                 )}
               />
-              {errors.projects && (
-                <p className="text-sm text-red-500">
-                  {errors.projects.message}
-                </p>
-              )}
             </div>
           </form>
         </TabsContent>
 
         <TabsContent value="preview">
-          {activeTab === "preview" && (
-            <Button
-              variant="link"
-              type="button"
-              className="mb-2"
-              onClick={() =>
-                setResumeMode(resumeMode === "preview" ? "edit" : "preview")
-              }
-            >
-              {resumeMode === "preview" ? (
-                <>
-                  <Edit className="h-4 w-4" />
-                  Edit Resume
-                </>
-              ) : (
-                <>
-                  <Monitor className="h-4 w-4" />
-                  Show Preview
-                </>
-              )}
-            </Button>
-          )}
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex space-x-2">
+              <Button
+                variant={templateMode === "professional" ? "default" : "outline"}
+                onClick={() => setTemplateMode("professional")}
+                className="flex items-center"
+              >
+                <Layout className="h-4 w-4 mr-2" />
+                Professional Template
+              </Button>
+              <Button
+                variant={templateMode === "markdown" ? "default" : "outline"}
+                onClick={() => setTemplateMode("markdown")}
+                className="flex items-center"
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                Markdown View
+              </Button>
+            </div>
+            
+            {templateMode === "markdown" && (
+              <Button
+                variant="link"
+                type="button"
+                onClick={() =>
+                  setResumeMode(resumeMode === "preview" ? "edit" : "preview")
+                }
+              >
+                {resumeMode === "preview" ? (
+                  <>
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit Markdown
+                  </>
+                ) : (
+                  <>
+                    <Monitor className="h-4 w-4 mr-2" />
+                    Show Preview
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
 
-          {activeTab === "preview" && resumeMode !== "preview" && (
+          {templateMode === "markdown" && activeTab === "preview" && resumeMode !== "preview" && (
             <div className="flex p-3 gap-2 items-center border-2 border-yellow-600 text-yellow-600 rounded mb-2">
               <AlertTriangle className="h-5 w-5" />
               <span className="text-sm">
-                You will lose editied markdown if you update the form data.
+                You will lose edited markdown if you update the form data.
               </span>
             </div>
           )}
-          <div className="border rounded-lg">
-            <MDEditor
-              value={previewContent}
-              onChange={setPreviewContent}
-              height={800}
-              preview={resumeMode}
-            />
-          </div>
-          <div className="hidden">
-            <div id="resume-pdf">
-              <MDEditor.Markdown
-                source={previewContent}
-                style={{
-                  background: "white",
-                  color: "black",
-                }}
+
+          {templateMode === "markdown" ? (
+            <div className="border rounded-lg">
+              <MDEditor
+                value={previewContent}
+                onChange={setPreviewContent}
+                height={800}
+                preview={resumeMode}
               />
             </div>
-          </div>
+          ) : (
+            <div className="border rounded-lg shadow-lg bg-white overflow-hidden">
+              <ProfessionalResumeTemplate resumeData={getResumeData()} />
+            </div>
+          )}
+
+          {/* Hidden MD preview for markdown PDF export if needed */}
+          {templateMode === "markdown" && (
+            <div className="hidden">
+              <div id="resume-pdf">
+                <MDEditor.Markdown
+                  source={previewContent}
+                  style={{
+                    background: "white",
+                    color: "black",
+                    padding: "20px",
+                  }}
+                />
+              </div>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>
