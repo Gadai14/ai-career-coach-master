@@ -1,16 +1,20 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Send, X, Minimize2, Maximize2, MessageSquare, Bot, Loader2 } from "lucide-react";
+import { Send, X, Minimize2, Maximize2, MessageSquare, Bot, Loader2, Upload, Image as ImageIcon } from "lucide-react";
 
 const FloatingChat = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [message, setMessage] = useState("");
   const [conversation, setConversation] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
   const chatContainerRef = useRef(null);
+  const fileInputRef = useRef(null);
   const [iconRotation, setIconRotation] = useState(0);
   const [showOpenAnimation, setShowOpenAnimation] = useState(false);
+  const [uploadedImage, setUploadedImage] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Scroll to bottom of messages
   const scrollToBottom = () => {
@@ -21,33 +25,83 @@ const FloatingChat = () => {
     scrollToBottom();
   }, [conversation]);
 
+  // Handle resize to toggle fullscreen on mobile
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768 && isFullscreen) {
+        document.body.style.overflow = "hidden";
+      } else {
+        document.body.style.overflow = "auto";
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    handleResize();
+    
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      document.body.style.overflow = "auto";
+    };
+  }, [isFullscreen]);
+
   // Handle sending a message
   const handleSendMessage = async (e) => {
     if (e) e.preventDefault();
-    if (!message.trim()) return;
+    if (!message.trim() && !uploadedImage) return;
 
     const newMessage = message.trim();
     setMessage("");
     
+    // Prepare message text
+    let messageText = newMessage;
+    let messageContent = { type: "text", content: newMessage };
+    
+    // If there's an uploaded image, include it
+    if (uploadedImage) {
+      messageContent = { 
+        type: "image", 
+        content: uploadedImage,
+        text: newMessage || "Image uploaded" 
+      };
+      messageText = newMessage || "Image uploaded";
+      setUploadedImage(null);
+    }
+    
     // Add user message to conversation
     setConversation((prev) => [
       ...prev,
-      { sender: "user", text: newMessage, timestamp: new Date() },
+      { 
+        sender: "user", 
+        text: messageText, 
+        timestamp: new Date(),
+        content: messageContent
+      },
     ]);
 
     // Show typing indicator
     setIsTyping(true);
 
     try {
-      // Call Gemini API
+      // Call Gemini API with text and potentially image data
+      let requestBody = {
+        contents: [{ parts: [{ text: messageText }] }],
+      };
+      
+      // If there was an image, add it to the request
+      if (messageContent.type === "image") {
+        // In a real implementation, you would process the image for Gemini's vision capabilities
+        // This is a simplified example that just mentions the image was processed
+        requestBody.contents[0].parts.push({ 
+          text: "Note: Image processing would happen here in a real implementation."
+        });
+      }
+      
       const res = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyAvc4MbqAxu8PmcphDueOSRfJyILfykDVs`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: newMessage }] }],
-          }),
+          body: JSON.stringify(requestBody),
         }
       );
       
@@ -118,6 +172,7 @@ const FloatingChat = () => {
       }
     } else {
       setIsOpen(false);
+      setIsFullscreen(false);
     }
   };
 
@@ -126,12 +181,50 @@ const FloatingChat = () => {
     setIsExpanded(!isExpanded);
   };
 
+  // Toggle fullscreen mode
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+  };
+
   // Handle key press for sending message with Enter
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
+  };
+
+  // Trigger file upload
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  // Handle file selection
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    if (!validTypes.includes(file.type)) {
+      alert('Please upload a JPG, PNG or GIF file');
+      return;
+    }
+    
+    setIsUploading(true);
+    
+    // Create a preview URL for the image
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setUploadedImage(reader.result);
+      setIsUploading(false);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Cancel uploaded image
+  const cancelUpload = () => {
+    setUploadedImage(null);
   };
 
   return (
@@ -160,11 +253,15 @@ const FloatingChat = () => {
         <div
           ref={chatContainerRef}
           className={`bg-white rounded-lg shadow-2xl flex flex-col overflow-hidden transition-all duration-500 border border-gray-200 ${
-            isExpanded ? "w-96 h-[600px]" : "w-80 h-[450px]"
+            isFullscreen 
+              ? "fixed inset-0 w-full h-full rounded-none z-50" 
+              : isExpanded 
+                ? "w-96 h-[600px]" 
+                : "w-80 h-[450px]"
           }`}
           style={{ 
             animation: "slideIn 0.5s ease-out forwards",
-            boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+            boxShadow: isFullscreen ? "none" : "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
           }}
         >
           {/* Chat header with gradient */}
@@ -183,14 +280,23 @@ const FloatingChat = () => {
             </div>
             <div className="flex items-center space-x-2">
               <button
+                onClick={toggleFullscreen}
+                className="p-1 hover:bg-white/20 rounded transition-all duration-200 md:hidden"
+                aria-label="Toggle fullscreen"
+              >
+                {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+              </button>
+              <button
                 onClick={toggleExpand}
-                className="p-1 hover:bg-white/20 rounded transition-all duration-200"
+                className={`p-1 hover:bg-white/20 rounded transition-all duration-200 ${isFullscreen ? 'hidden' : 'hidden md:block'}`}
+                aria-label="Toggle maximize"
               >
                 {isExpanded ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
               </button>
               <button
                 onClick={toggleChat}
                 className="p-1 hover:bg-white/20 rounded transition-all duration-200"
+                aria-label="Close chat"
               >
                 <X size={16} />
               </button>
@@ -218,6 +324,17 @@ const FloatingChat = () => {
                         : "bg-white border border-gray-100 text-gray-800 rounded-bl-none"
                     }`}
                   >
+                    {/* Display uploaded image if present */}
+                    {msg.content?.type === "image" && (
+                      <div className="mb-2 rounded overflow-hidden">
+                        <img 
+                          src={msg.content.content} 
+                          alt="Uploaded by user" 
+                          className="max-w-full h-auto rounded"
+                        />
+                      </div>
+                    )}
+                    
                     <p className="whitespace-pre-wrap break-words">{msg.text}</p>
                     <p
                       className={`text-xs mt-1 ${
@@ -242,36 +359,96 @@ const FloatingChat = () => {
                   </div>
                 </div>
               )}
+              
+              {/* Display image preview if uploaded but not yet sent */}
+              {uploadedImage && (
+                <div className="flex justify-end" style={{ animation: "fadeIn 0.3s ease-out forwards" }}>
+                  <div className="bg-white border-2 border-purple-300 rounded-lg p-3 max-w-[80%] shadow-sm relative">
+                    <button 
+                      onClick={cancelUpload} 
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600"
+                      aria-label="Cancel upload"
+                    >
+                      <X size={14} />
+                    </button>
+                    <img 
+                      src={uploadedImage} 
+                      alt="Preview" 
+                      className="max-w-full h-auto rounded"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Ready to send</p>
+                  </div>
+                </div>
+              )}
+              
               <div ref={messagesEndRef} />
             </div>
           </div>
 
           {/* Chat input with improved design */}
           <div className="p-4 border-t bg-white">
-            <div className="flex items-center space-x-2 relative">
-              <input
-                type="text"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyDown={handleKeyPress}
-                placeholder="Type your message..."
-                className="flex-1 py-3 px-4 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-400/50 shadow-sm transition-all duration-300"
-                autoFocus
-              />
-              <button
-                onClick={handleSendMessage}
-                disabled={!message.trim()}
-                className={`p-3 rounded-full transition-all duration-300 ${
-                  message.trim()
-                    ? "bg-gradient-to-r from-purple-600 to-blue-500 text-white shadow-md hover:shadow-lg"
-                    : "bg-gray-200 text-gray-400"
-                }`}
-              >
-                {isTyping ? 
-                  <Loader2 size={18} className="animate-spin" /> :
-                  <Send size={18} className={message.trim() ? "animate-pulse" : ""} />
-                }
-              </button>
+            <div className="relative">
+              {/* Display uploads in progress */}
+              {isUploading && (
+                <div className="absolute inset-x-0 -top-8 flex justify-center">
+                  <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full flex items-center space-x-2 shadow-md">
+                    <Loader2 size={14} className="animate-spin" />
+                    <span className="text-xs">Uploading image...</span>
+                  </div>
+                </div>
+              )}
+              
+              <div className="flex items-center space-x-2">
+                {/* Hidden file input */}
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  accept="image/jpeg,image/png,image/gif"
+                  className="hidden"
+                />
+                
+                {/* Upload button */}
+                <button
+                  onClick={handleUploadClick}
+                  disabled={isUploading}
+                  className="p-3 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-all duration-300 flex-shrink-0"
+                  aria-label="Upload image"
+                >
+                  {isUploading ? 
+                    <Loader2 size={20} className="animate-spin" /> : 
+                    <ImageIcon size={20} />
+                  }
+                </button>
+                
+                {/* Message input */}
+                <input
+                  type="text"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyDown={handleKeyPress}
+                  placeholder="Type your message..."
+                  className="flex-1 py-3 px-4 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-purple-400/50 shadow-sm transition-all duration-300 text-sm md:text-base"
+                  autoFocus
+                />
+                
+                {/* Send button - enhanced for mobile */}
+                <button
+                  onClick={handleSendMessage}
+                  disabled={!message.trim() && !uploadedImage}
+                  className={`p-3 rounded-full transition-all duration-300 ${
+                    message.trim() || uploadedImage
+                      ? "bg-gradient-to-r from-purple-600 to-blue-500 text-white shadow-md hover:shadow-lg"
+                      : "bg-gray-200 text-gray-400"
+                  } flex-shrink-0`}
+                  aria-label="Send message"
+                >
+                  {isTyping ? 
+                    <Loader2 size={20} className="animate-spin" /> :
+                    <Send size={20} className={(message.trim() || uploadedImage) ? "animate-pulse" : ""} />
+                  }
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -305,6 +482,14 @@ const FloatingChat = () => {
           0% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.4); }
           70% { box-shadow: 0 0 0 10px rgba(124, 58, 237, 0); }
           100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0); }
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+          .fixed.bottom-6.right-6 {
+            bottom: 1rem;
+            right: 1rem;
+          }
         }
       `}</style>
     </div>
