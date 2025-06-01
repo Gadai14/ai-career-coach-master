@@ -67,6 +67,17 @@ export default async function Header() {
                     Build Resume
                   </Link>
                 </DropdownMenuItem>
+
+                <DropdownMenuItem asChild>
+                  <Link
+                    href="/ai-resume-ats-score"
+                    className="flex items-center gap-2"
+                  >
+                    <PenBox className="h-4 w-4" />
+                    Resume ATS Score
+                  </Link>
+                </DropdownMenuItem>
+
                 <DropdownMenuItem asChild>
                   <Link
                     href="/ai-cover-letter"
@@ -76,6 +87,8 @@ export default async function Header() {
                     Cover Letter
                   </Link>
                 </DropdownMenuItem>
+
+               
                 <DropdownMenuItem asChild>
                   <Link href="/interview" className="flex items-center gap-2">
                     <GraduationCap className="h-4 w-4" />
