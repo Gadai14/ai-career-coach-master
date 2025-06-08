@@ -15,9 +15,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "../components/ui/dropdown-menu";
 import Image from "next/image";
-import { checkUser } from "@/lib/checkUser";
+import { checkUser } from "../lib/checkUser";
 
 export default async function Header() {
   await checkUser();
@@ -95,8 +95,25 @@ export default async function Header() {
                     Interview Prep
                   </Link>
                 </DropdownMenuItem>
+
+                <DropdownMenuItem asChild>
+                  <Link
+                    href="/carrer-guider"
+                    className="flex items-center gap-2"
+                  >
+                    <PenBox className="h-4 w-4" />
+                    Carrer Guider
+                  </Link>
+                </DropdownMenuItem>
+                
               </DropdownMenuContent>
+
+               
             </DropdownMenu>
+
+           
+
+
           </SignedIn>
 
           <SignedOut>
