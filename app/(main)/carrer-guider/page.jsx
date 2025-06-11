@@ -1,16 +1,16 @@
 "use client"
 import { useState } from "react"
-import { CodingTerminalModal } from "./_components/coding-terminal-modal" 
+import Link from "next/link"
+import { CodingTerminalModal } from "./_components/coding-terminal-modal"
 import { Terminal, Binary, Coffee, Code2, Hash, Globe, Layout, ArrowRight, Sparkles } from "lucide-react"
 
 // RoadmapCard Component
-const RoadmapCard = ({ title, description, icon: IconComponent, href, delay = 0 }) => {
+const RoadmapCard = ({ title, description, icon: IconComponent, delay = 0 }) => {
   return (
     <div 
       className={`group relative bg-gradient-to-br from-gray-900/50 to-gray-800/30 backdrop-blur-sm border border-gray-700/50 rounded-xl p-6 hover:border-gray-600/60 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-gray-900/20 cursor-pointer animate-fade-in`}
       style={{ animationDelay: `${delay}ms` }}
     >
-      {/* Gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       
       {/* Icon */}
@@ -29,12 +29,10 @@ const RoadmapCard = ({ title, description, icon: IconComponent, href, delay = 0 
           {description}
         </p>
         
-        {/* Action text */}
         <div className="flex items-center gap-2 text-sm text-gray-500 group-hover:text-blue-400 transition-all duration-300 pt-2">
           <span>Follow our step-by-step guide with curated resources to master this skill.</span>
         </div>
         
-        {/* View Roadmap Button */}
         <div className="pt-4">
           <div className="bg-gray-800/50 hover:bg-gray-700/50 text-gray-300 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-purple-600">
             View Roadmap
@@ -42,13 +40,11 @@ const RoadmapCard = ({ title, description, icon: IconComponent, href, delay = 0 
           </div>
         </div>
       </div>
-      
-      {/* Hover glow effect */}
+
       <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500/0 via-purple-500/0 to-pink-500/0 group-hover:from-blue-500/10 group-hover:via-purple-500/10 group-hover:to-pink-500/10 transition-all duration-500 pointer-events-none" />
     </div>
   )
 }
-
 
 export default function Home() {
   const [isTerminalOpen, setIsTerminalOpen] = useState(false)
@@ -94,7 +90,7 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-      {/* Background decorative elements */}
+      {/* Background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl" />
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl" />
@@ -106,7 +102,6 @@ export default function Home() {
         <section className="relative">
           <div className="container mx-auto px-4 py-16 md:py-20 lg:py-24">
             <div className="flex flex-col lg:flex-row items-start justify-between gap-8 lg:gap-12">
-              {/* Left side - Main content */}
               <div className="flex-1 max-w-4xl">
                 <div className="flex flex-col items-start gap-6 text-left">
                   <div className="flex items-center gap-2 text-blue-400 text-sm font-medium mb-2">
@@ -131,7 +126,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Right side - Terminal Button */}
               <div className="flex flex-col items-start lg:items-end gap-4 w-full lg:w-auto">
                 <button
                   onClick={() => setIsTerminalOpen(true)}
@@ -153,25 +147,24 @@ export default function Home() {
         <section className="container mx-auto px-4 pb-16 md:pb-20">
           <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3 auto-rows-fr">
             {roadmaps.map((roadmap, index) => (
-              <RoadmapCard
-                key={roadmap.title}
-                title={roadmap.title}
-                description={roadmap.description}
-                icon={roadmap.icon}
-                href={roadmap.href}
-                delay={index * 100}
-              />
+              <Link key={roadmap.title} href={roadmap.href}>
+                <RoadmapCard
+                  title={roadmap.title}
+                  description={roadmap.description}
+                  icon={roadmap.icon}
+                  delay={index * 100}
+                />
+              </Link>
             ))}
           </div>
         </section>
       </main>
 
-      {/* Terminal Modal */}
       <CodingTerminalModal 
         isOpen={isTerminalOpen} 
         onClose={() => setIsTerminalOpen(false)} 
       />
-      
+
       <style jsx>{`
         @keyframes fade-in {
           from {
