@@ -9,35 +9,32 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { ExternalLink, Star, DollarSign, BookOpen } from "lucide-react"
 import Image from "next/image"
 
-interface Course {
-  id: string
-  title: string
-  instructor: string
-  platform: "udemy" | "coursera" | "edx" | "youtube" | "other"
-  image: string
-  rating: number
-  reviews: number
-  price: number | "Free"
-  discount?: number
-  url: string
-  description: string
-  level: "Beginner" | "Intermediate" | "Advanced" | "All Levels"
-  duration: string
-  tags: string[]
-}
+/**
+ * @typedef {Object} Course
+ * @property {string} id
+ * @property {string} title
+ * @property {string} instructor
+ * @property {"udemy" | "coursera" | "edx" | "youtube" | "other"} platform
+ * @property {string} image
+ * @property {number} rating
+ * @property {number} reviews
+ * @property {number | "Free"} price
+ * @property {number} [discount]
+ * @property {string} url
+ * @property {string} description
+ * @property {"Beginner" | "Intermediate" | "Advanced" | "All Levels"} level
+ * @property {string} duration
+ * @property {string[]} tags
+ */
 
-interface CourseRecommendationProps {
-  topic: string
-  currentStep: number
-}
 
-export function CourseRecommendation({ topic, currentStep }: CourseRecommendationProps) {
+export function CourseRecommendation({ topic, currentStep }) {
   const [selectedTab, setSelectedTab] = useState("recommended")
 
   // Get courses based on topic and current step
-  const getCourses = (topic: string, step: number): Course[] => {
+  const getCourses = (topic, step) => {
     // Map step number to difficulty level
-    const getLevel = (step: number): "Beginner" | "Intermediate" | "Advanced" | "All Levels" => {
+    const getLevel = (step) => {
       if (step <= 1) return "Beginner"
       if (step <= 3) return "Intermediate"
       return "Advanced"
@@ -46,7 +43,7 @@ export function CourseRecommendation({ topic, currentStep }: CourseRecommendatio
     const level = getLevel(step)
 
     // Course database by topic
-    const courseDatabase: Record<string, Course[]> = {
+    const courseDatabase = {
       cpp: [
         {
           id: "cpp-1",
@@ -374,7 +371,7 @@ export function CourseRecommendation({ topic, currentStep }: CourseRecommendatio
   const freeCourses = courses.filter((course) => course.price === "Free")
   const paidCourses = courses.filter((course) => course.price !== "Free")
 
-  const renderCourseCard = (course: Course) => (
+  const renderCourseCard = (course) => (
     <Card key={course.id} className="border-gray-700 bg-gray-800/50 hover:bg-gray-800 transition-all duration-300">
       <CardContent className="p-4">
         <div className="flex gap-4">
@@ -386,8 +383,10 @@ export function CourseRecommendation({ topic, currentStep }: CourseRecommendatio
               fill
               className="object-cover rounded-md"
               onError={(e) => {
-                const target = e.target as HTMLImageElement
-                target.src = "/placeholder.svg?height=60&width=100"
+                const target = e.target
+                if (target && target.tagName === "IMG") {
+                  target.src = "/placeholder.svg?height=60&width=100"
+                }
               }}
             />
           </div>
@@ -451,7 +450,7 @@ export function CourseRecommendation({ topic, currentStep }: CourseRecommendatio
     </Card>
   )
 
-  const getPlatformName = (platform: string) => {
+  const getPlatformName = (platform) => {
     switch (platform) {
       case "udemy":
         return "Udemy"
@@ -466,7 +465,7 @@ export function CourseRecommendation({ topic, currentStep }: CourseRecommendatio
     }
   }
 
-  const getPlatformColor = (platform: string) => {
+  const getPlatformColor = (platform) => {
     switch (platform) {
       case "udemy":
         return "bg-purple-900/30 text-purple-300 border-purple-800"

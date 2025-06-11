@@ -1,35 +1,37 @@
 "use client"
 
-import type React from "react"
+import React from "react"
 
 import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { BookOpen, Code, Trophy, Target } from "lucide-react"
 
-interface RoadmapStep {
-  id: number
-  title: string
-  description: string
-  icon: React.ReactNode
-  color: string
-  position: { x: number; y: number }
-  completed: boolean
-  current: boolean
-}
+/**
+ * @typedef {Object} RoadmapStep
+ * @property {number} id
+ * @property {string} title
+ * @property {string} description
+ * @property {React.ReactNode} icon
+ * @property {string} color
+ * @property {{ x: number, y: number }} position
+ * @property {boolean} completed
+ * @property {boolean} current
+ */
 
-interface AnimatedRoadmapJourneyProps {
-  roadmapTitle: string
-  totalSteps: number
-  estimatedMonths: number
-}
+/**
+ * @typedef {Object} AnimatedRoadmapJourneyProps
+ * @property {string} roadmapTitle
+ * @property {number} totalSteps
+ * @property {number} estimatedMonths
+ */
 
-export function AnimatedRoadmapJourney({ roadmapTitle, totalSteps, estimatedMonths }: AnimatedRoadmapJourneyProps) {
+export function AnimatedRoadmapJourney({ roadmapTitle, totalSteps, estimatedMonths }) {
   const [currentStep, setCurrentStep] = useState(1)
   const [animationProgress, setAnimationProgress] = useState(0)
 
   // Define the roadmap steps with curved path positions
-  const steps: RoadmapStep[] = [
+  const steps = [
     {
       id: 1,
       title: "Fundamentals",

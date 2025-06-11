@@ -9,33 +9,35 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
-interface VideoData {
-  id: string
-  title: string
-  channel: string
-  channelId: string
-  thumbnail: string
-  duration: string
-  views: string
-  uploadDate: string
-  description: string
-  tags: string[]
-  channelAvatar: string
-  subscribers: string
-  url: string
-}
+/**
+ * @typedef {Object} VideoData
+ * @property {string} id
+ * @property {string} title
+ * @property {string} channel
+ * @property {string} channelId
+ * @property {string} thumbnail
+ * @property {string} duration
+ * @property {string} views
+ * @property {string} uploadDate
+ * @property {string} description
+ * @property {string[]} tags
+ * @property {string} channelAvatar
+ * @property {string} subscribers
+ * @property {string} url
+ */
 
-interface VideoRecommendationProps {
-  title: string
-  channel: string
-  thumbnail: string
-  url: string
-  duration: string
-  views?: string
-  uploadDate?: string
-  description?: string
-  tags?: string[]
-}
+/**
+ * @typedef {Object} VideoRecommendationProps
+ * @property {string} title
+ * @property {string} channel
+ * @property {string} thumbnail
+ * @property {string} url
+ * @property {string} duration
+ * @property {string=} views
+ * @property {string=} uploadDate
+ * @property {string=} description
+ * @property {string[]=} tags
+ */
 
 export function VideoRecommendation({
   title,
@@ -47,11 +49,11 @@ export function VideoRecommendation({
   uploadDate = "2 months ago",
   description = "Learn the fundamentals with this comprehensive tutorial covering all essential concepts.",
   tags = [],
-}: VideoRecommendationProps) {
+}) {
   const [isPlayerOpen, setIsPlayerOpen] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
-  const [relatedVideos, setRelatedVideos] = useState<VideoData[]>([])
-  const [channelVideos, setChannelVideos] = useState<VideoData[]>([])
+  const [relatedVideos, setRelatedVideos] = useState([])
+  const [channelVideos, setChannelVideos] = useState([])
   const [loading, setLoading] = useState(false)
   const [selectedTab, setSelectedTab] = useState("related")
 
@@ -69,7 +71,7 @@ export function VideoRecommendation({
   })
 
   // Extract YouTube video ID from URL
-  const getYouTubeVideoId = (url: string) => {
+  const getYouTubeVideoId = (url) => {
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
     const match = url.match(regExp)
     return match && match[2].length === 11 ? match[2] : null
@@ -79,10 +81,10 @@ export function VideoRecommendation({
   const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0` : ""
 
   // MASSIVE Video Database with Real YouTube Data
-  const getVideoDatabase = (topic: string, currentChannel: string) => {
+  const getVideoDatabase = (topic, currentChannel) => {
     const topicLower = topic.toLowerCase()
 
-    const videoDatabase: { [key: string]: VideoData[] } = {
+    const videoDatabase = {
       // ==================== C++ VIDEOS ====================
       cpp: [
         {
@@ -525,10 +527,10 @@ export function VideoRecommendation({
   }
 
   // Channel Database with Real Creator Videos
-  const getChannelVideos = (channelName: string) => {
+  const getChannelVideos = (channelName) => {
     const channelLower = channelName.toLowerCase().replace(/\s+/g, "")
 
-    const channelDatabase: { [key: string]: VideoData[] } = {
+    const channelDatabase = {
       // ==================== CODE WITH HARRY ====================
       codewithharry: [
         {
@@ -605,7 +607,7 @@ export function VideoRecommendation({
   }
 
   // Fetch real YouTube data
-  const fetchYouTubeData = async (query: string, type: "search" | "channel" = "search") => {
+  const fetchYouTubeData = async (query, type = "search") => {
     setLoading(true)
 
     try {
@@ -634,7 +636,7 @@ export function VideoRecommendation({
   }, [isPlayerOpen, currentVideo])
 
   // Handle playing a related video
-  const playRelatedVideo = (video: VideoData) => {
+  const playRelatedVideo = (video) => {
     setCurrentVideo({
       title: video.title,
       channel: video.channel,
@@ -648,7 +650,7 @@ export function VideoRecommendation({
     })
   }
 
-  const VideoCard = ({ video, onClick }: { video: VideoData; onClick: () => void }) => (
+  const VideoCard = ({ video, onClick }) => (
     <div
       className="flex gap-3 p-3 rounded-lg hover:bg-gray-700 cursor-pointer transition-colors group"
       onClick={onClick}
@@ -660,8 +662,10 @@ export function VideoRecommendation({
           fill
           className="object-cover rounded"
           onError={(e) => {
-            const target = e.target as HTMLImageElement
-            target.src = "/placeholder.svg?height=68&width=120"
+            const target = e.target;
+            if (target && target.src) {
+              target.src = "/placeholder.svg?height=68&width=120";
+            }
           }}
         />
         <div className="absolute bottom-1 right-1 bg-black/80 text-white text-xs px-1 rounded flex items-center gap-1">
@@ -684,8 +688,10 @@ export function VideoRecommendation({
             height={16}
             className="rounded-full"
             onError={(e) => {
-              const target = e.target as HTMLImageElement
-              target.src = "/placeholder.svg?height=16&width=16"
+              const target = e.target
+              if (target && target.tagName === "IMG") {
+                target.src = "/placeholder.svg?height=16&width=16"
+              }
             }}
           />
           <p className="text-gray-400 text-xs font-medium">{video.channel}</p>

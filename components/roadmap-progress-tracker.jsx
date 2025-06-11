@@ -6,13 +6,10 @@ import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Clock, CheckCircle, PlayCircle, Calendar } from "lucide-react"
 
-interface RoadmapProgressTrackerProps {
-  roadmapTitle: string
-  totalSteps: number
-  estimatedMonths: number
-}
-
-export function RoadmapProgressTracker({ roadmapTitle, totalSteps, estimatedMonths }: RoadmapProgressTrackerProps) {
+/**
+ * @param {{ roadmapTitle: string, totalSteps: number, estimatedMonths: number }} props
+ */
+export function RoadmapProgressTracker({ roadmapTitle, totalSteps, estimatedMonths }) {
   const [completedSteps, setCompletedSteps] = useState(0)
   const [currentWeek, setCurrentWeek] = useState(1)
   const [timeSpent, setTimeSpent] = useState(0) // in hours

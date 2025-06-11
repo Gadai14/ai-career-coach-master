@@ -1,16 +1,13 @@
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
-import { RoadmapStep } from "@/components/roadmap-step";
+import { RoadmapStep } from "../../carrer-guider/_components/roadmap-step";
 import { VideoRecommendation } from "@/components/video-recommendation";
 import { AnimatedRoadmapJourney } from "@/components/animated-roadmap-journey";
 
 export default function CSharpRoadmap() {
   return (
     <div className="flex min-h-screen flex-col bg-black">
-      <SiteHeader />
       <main className="flex-1 container py-10">
         <div className="mb-8">
           <Button variant="ghost" size="sm" asChild className="mb-4 text-white hover:bg-gray-800">
@@ -242,7 +239,6 @@ export default function CSharpRoadmap() {
           </div>
         </div>
       </main>
-      <SiteFooter />
     </div>
   );
 }

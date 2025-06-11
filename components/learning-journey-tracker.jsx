@@ -1,6 +1,6 @@
 "use client"
 
-import type React from "react"
+import React from "react"
 
 import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
@@ -9,43 +9,43 @@ import { Progress } from "@/components/ui/progress"
 import { BookOpen, Code, TrendingUp, Trophy, CheckCircle2, Circle } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-interface Step {
-  id: number
-  title: string
-  description: string
-  icon: React.ReactNode
-  color: string
-  position: { x: number; y: number }
-  completed: boolean
-  current: boolean
-  videos: {
-    id: string
-    title: string
-    watched: boolean
-  }[]
-}
+/* 
+  Step type definition (for reference only, not used in JS):
+  {
+    id: number,
+    title: string,
+    description: string,
+    icon: React.ReactNode,
+    color: string,
+    position: { x: number, y: number },
+    completed: boolean,
+    current: boolean,
+    videos: Array<{ id: string, title: string, watched: boolean }>
+  }
+*/
 
-interface LearningJourneyTrackerProps {
-  roadmapTitle: string
-  totalSteps: number
-  estimatedMonths: number
-  initialStep?: number
-}
+/**
+ * @typedef {Object} LearningJourneyTrackerProps
+ * @property {string} roadmapTitle
+ * @property {number} totalSteps
+ * @property {number} estimatedMonths
+ * @property {number} [initialStep]
+ */
 
 export function LearningJourneyTracker({
   roadmapTitle,
   totalSteps,
   estimatedMonths,
   initialStep = 1,
-}: LearningJourneyTrackerProps) {
+}) {
   const [currentStep, setCurrentStep] = useState(initialStep)
-  const [completedVideos, setCompletedVideos] = useState<Record<number, string[]>>({})
+  const [completedVideos, setCompletedVideos] = useState({})
   const [progress, setProgress] = useState(0)
   const [totalVideos, setTotalVideos] = useState(0)
   const [watchedVideos, setWatchedVideos] = useState(0)
 
   // Define the roadmap steps with curved path positions
-  const getSteps = (): Step[] => {
+  const getSteps = () => {
     const stepTitles = {
       1: "Fundamentals",
       2: "Core Concepts",
@@ -138,11 +138,11 @@ export function LearningJourneyTracker({
     const positions = generatePositions()
 
     // Generate mock videos for each step
-    const generateVideosForStep = (stepId: number) => {
+    const generateVideosForStep = (stepId) => {
       const videoCount = stepId === 1 ? 5 : stepId === 2 ? 7 : stepId === 3 ? 6 : stepId === 4 ? 8 : 5
       return Array.from({ length: videoCount }).map((_, idx) => ({
         id: `video-${stepId}-${idx + 1}`,
-        title: `Video ${idx + 1} for ${stepTitles[stepId as keyof typeof stepTitles] || `Step ${stepId}`}`,
+        title: `Video ${idx + 1} for ${stepTitles[stepId] || `Step ${stepId}`}`,
         watched: (completedVideos[stepId] || []).includes(`video-${stepId}-${idx + 1}`),
       }))
     }
@@ -151,10 +151,10 @@ export function LearningJourneyTracker({
       const stepId = idx + 1
       return {
         id: stepId,
-        title: stepTitles[stepId as keyof typeof stepTitles] || `Step ${stepId}`,
-        description: stepDescriptions[stepId as keyof typeof stepDescriptions] || `Description for Step ${stepId}`,
-        icon: stepIcons[stepId as keyof typeof stepIcons] || <BookOpen className="h-6 w-6" />,
-        color: stepColors[stepId as keyof typeof stepColors] || "bg-gray-500",
+        title: stepTitles[stepId] || `Step ${stepId}`,
+        description: stepDescriptions[stepId] || `Description for Step ${stepId}`,
+        icon: stepIcons[stepId] || <BookOpen className="h-6 w-6" />,
+        color: stepColors[stepId] || "bg-gray-500",
         position: positions[idx],
         completed: stepId < currentStep,
         current: stepId === currentStep,
@@ -185,7 +185,7 @@ export function LearningJourneyTracker({
   }, [completedVideos, currentStep, steps])
 
   // Mark a video as watched
-  const markVideoAsWatched = (stepId: number, videoId: string) => {
+  const markVideoAsWatched = (stepId, videoId) => {
     setCompletedVideos((prev) => {
       const stepVideos = prev[stepId] || []
       if (stepVideos.includes(videoId)) return prev
