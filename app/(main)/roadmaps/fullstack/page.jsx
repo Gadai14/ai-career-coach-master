@@ -1,10 +1,10 @@
 import Link from "next/link"
 import { ChevronLeft } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
+import { Button } from "../../../../components/ui/button"
 import { RoadmapStep } from "../../carrer-guider/_components/roadmap-step"
 import { VideoRecommendation } from "../../../../components/video-recommendation"
-import { Separator } from "@/components/ui/separator"
+import { Separator } from "../../../../components/ui/separator"
 import { AnimatedRoadmapJourney } from "../../../../components/animated-roadmap-journey"
 
 export default function FullStackRoadmap() {
@@ -25,9 +25,14 @@ export default function FullStackRoadmap() {
           </p>
         </div>
 
-        <div className="flex gap-8">
-          {/* Left side - Roadmap content */}
-          <div className="flex-1 max-w-4xl">
+        {/* Mobile/Tablet: Journey card at top */}
+        <div className="lg:hidden mb-8">
+          <AnimatedRoadmapJourney roadmapTitle="Full Stack" totalSteps={7} estimatedMonths={8} />
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Main content - Roadmap steps */}
+          <div className="flex-1 lg:max-w-4xl">
             <div className="space-y-16">
               <RoadmapStep
                 number={1}
@@ -333,60 +338,63 @@ export default function FullStackRoadmap() {
                 </div>
               </RoadmapStep>
             </div>
-          </div>
 
-          {/* Right side - Beautiful Animated Journey Roadmap */}
-          <div className="w-96 sticky top-20 h-fit">
-            <AnimatedRoadmapJourney roadmapTitle="Full Stack" totalSteps={7} estimatedMonths={8} />
-          </div>
-        </div>
-
-        <div className="mt-16 max-w-4xl mx-auto">
-          <Separator className="my-8 bg-gray-700" />
-          <h2 className="text-2xl font-bold mb-4 text-white">Projects to Build</h2>
-          <p className="text-gray-300 mb-6">
-            Building projects is the best way to solidify your knowledge. Here are some project ideas to work on as you
-            progress through the roadmap:
-          </p>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="border border-gray-700 rounded-lg p-4 bg-gray-900">
-              <h3 className="font-bold text-white">Beginner Projects</h3>
-              <ul className="list-disc pl-5 mt-2 space-y-1 text-gray-300">
-                <li>Personal portfolio website</li>
-                <li>To-do list application</li>
-                <li>Weather app using a public API</li>
-                <li>Simple blog with static content</li>
-              </ul>
-            </div>
-
-            <div className="border border-gray-700 rounded-lg p-4 bg-gray-900">
-              <h3 className="font-bold text-white">Intermediate Projects</h3>
-              <ul className="list-disc pl-5 mt-2 space-y-1 text-gray-300">
-                <li>E-commerce store with cart functionality</li>
-                <li>Social media dashboard</li>
-                <li>Recipe sharing platform</li>
-                <li>Job board with filtering</li>
-              </ul>
-            </div>
-
-            <div className="border border-gray-700 rounded-lg p-4 bg-gray-900">
-              <h3 className="font-bold text-white">Advanced Projects</h3>
-              <ul className="list-disc pl-5 mt-2 space-y-1 text-gray-300">
-                <li>Full-featured social network</li>
-                <li>Real-time chat application</li>
-                <li>Project management tool</li>
-                <li>Online learning platform</li>
-              </ul>
-            </div>
-
-            <div className="border border-gray-700 rounded-lg p-4 bg-gray-900">
-              <h3 className="font-bold text-white">Capstone Project</h3>
-              <p className="mt-2 text-sm text-gray-300">
-                Build a complete application that showcases all your skills. Include authentication, database, file
-                uploads, responsive design, and deploy it to a cloud platform. Document your process and add it to your
-                portfolio.
+            {/* Projects section moved inside main content area */}
+            <div className="mt-16">
+              <Separator className="my-8 bg-gray-700" />
+              <h2 className="text-2xl font-bold mb-4 text-white">Projects to Build</h2>
+              <p className="text-gray-300 mb-6">
+                Building projects is the best way to solidify your knowledge. Here are some project ideas to work on as you
+                progress through the roadmap:
               </p>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="border border-gray-700 rounded-lg p-4 bg-gray-900">
+                  <h3 className="font-bold text-white">Beginner Projects</h3>
+                  <ul className="list-disc pl-5 mt-2 space-y-1 text-gray-300">
+                    <li>Personal portfolio website</li>
+                    <li>To-do list application</li>
+                    <li>Weather app using a public API</li>
+                    <li>Simple blog with static content</li>
+                  </ul>
+                </div>
+
+                <div className="border border-gray-700 rounded-lg p-4 bg-gray-900">
+                  <h3 className="font-bold text-white">Intermediate Projects</h3>
+                  <ul className="list-disc pl-5 mt-2 space-y-1 text-gray-300">
+                    <li>E-commerce store with cart functionality</li>
+                    <li>Social media dashboard</li>
+                    <li>Recipe sharing platform</li>
+                    <li>Job board with filtering</li>
+                  </ul>
+                </div>
+
+                <div className="border border-gray-700 rounded-lg p-4 bg-gray-900">
+                  <h3 className="font-bold text-white">Advanced Projects</h3>
+                  <ul className="list-disc pl-5 mt-2 space-y-1 text-gray-300">
+                    <li>Full-featured social network</li>
+                    <li>Real-time chat application</li>
+                    <li>Project management tool</li>
+                    <li>Online learning platform</li>
+                  </ul>
+                </div>
+
+                <div className="border border-gray-700 rounded-lg p-4 bg-gray-900">
+                  <h3 className="font-bold text-white">Capstone Project</h3>
+                  <p className="mt-2 text-sm text-gray-300">
+                    Build a complete application that showcases all your skills. Include authentication, database, file
+                    uploads, responsive design, and deploy it to a cloud platform. Document your process and add it to your
+                    portfolio.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop: Sticky sidebar on the right */}
+          <div className="hidden lg:block lg:w-96 lg:flex-shrink-0">
+            <div className="sticky top-8">
+              <AnimatedRoadmapJourney roadmapTitle="Full Stack" totalSteps={7} estimatedMonths={8} />
             </div>
           </div>
         </div>

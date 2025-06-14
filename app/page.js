@@ -2,8 +2,8 @@
 import { useEffect } from "react"; 
  import React from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "../components/ui/button"
+import { Card, CardContent } from "../components/ui/card";
 import {
   ArrowRight,
   Trophy,
@@ -11,19 +11,19 @@ import {
   Sparkles,
   CheckCircle2,
 } from "lucide-react";
-import HeroSection from "@/components/hero";
+import HeroSection from "../components/hero";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
+} from "../components/ui/accordion";
 import Image from "next/image";
-import { features } from "@/data/features";
-import { testimonial } from "@/data/testimonial";
-import { faqs } from "@/data/faqs";
-import { howItWorks } from "@/data/howItWorks";
-import FloatingChat from "@/components/FloatingChat";
+import { features } from "../data/features";
+import { testimonial } from "../data/testimonial";
+import { faqs } from "../data/faqs";
+import { howItWorks } from "../data/howItWorks";
+import FloatingChat from "../components/FloatingChat";
 
 export default function LandingPage() {
   return (
