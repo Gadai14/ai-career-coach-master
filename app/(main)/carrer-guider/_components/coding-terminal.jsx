@@ -3,10 +3,10 @@
 import { useState } from "react"
 import { Play, Copy, Download, Settings } from "lucide-react"
 import { Button } from "../../../../components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
-import { Badge } from "@/components/ui/badge"
+import { Card, CardContent, CardHeader, CardTitle } from "../../../../components/ui/card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../../components/ui/select"
+import { Textarea } from "../../../../components/ui/textarea"
+import { Badge } from "../../../../components/ui/badge"
 
 const languageTemplates = {
   javascript: `// JavaScript Example

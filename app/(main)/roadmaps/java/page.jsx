@@ -1,11 +1,11 @@
 import Link from "next/link"
 import { ChevronLeft } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
+import { Button } from "../../../../components/ui/button"
 
 import { RoadmapStep } from "../../carrer-guider/_components/roadmap-step"
 import { VideoRecommendation } from "../../../../components/video-recommendation"
-import { AnimatedRoadmapJourney } from "@/components/animated-roadmap-journey"
+import { AnimatedRoadmapJourney } from "../../../../components/animated-roadmap-journey"
 
 export default function JavaRoadmap() {
   return (
