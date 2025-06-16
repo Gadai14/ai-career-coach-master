@@ -105,6 +105,19 @@ export default async function Header() {
                     Carrer Guider
                   </Link>
                 </DropdownMenuItem>
+
+                <DropdownMenuItem asChild>
+  <a
+    href="https://career-path-six.vercel.app/"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="flex items-center gap-2"
+  >
+    <PenBox className="h-4 w-4" />
+    Career Guider
+  </a>
+</DropdownMenuItem>
+
                 
               </DropdownMenuContent>
 

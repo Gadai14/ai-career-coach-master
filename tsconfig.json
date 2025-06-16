@@ -28,7 +28,7 @@
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx"
-  ],
+, "app/(main)/career-path/_components/LandingPage.jsx", "app/(main)/career-path/_components/ProfessionalForm.jsx", "app/(main)/career-path/_components/ResourcesPage.jsx", "app/(main)/career-path/_components/StudentForm.jsx"  ],
   "exclude": [
     "node_modules"
   ]
