@@ -2,8 +2,8 @@
 
 
 import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../../components/ui/card"
+import { Button } from "../../../../components/ui/button"
 import { Upload, FileText, Award, BarChart3, CheckCircle, ArrowRight } from "lucide-react"
 
 export default function Component() {
